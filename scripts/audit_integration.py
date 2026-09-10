@@ -93,7 +93,7 @@ def audit_local_dir(repo_path: Path, remote_name: str | None = None) -> AuditRep
     if remote_name:
         try:
             out = subprocess.check_output(
-                ["gh", "repo", "view", remote_name, "--json", "repositoryTopics"],
+                ["gh", "repo", "view", remote_name, "--json", "repositoryTopics,description"],
                 stderr=subprocess.DEVNULL,
             )
             data = json.loads(out)
@@ -101,6 +101,7 @@ def audit_local_dir(repo_path: Path, remote_name: str | None = None) -> AuditRep
             report.add("GitHub Topics", "home-assistant-integration tag", TOPIC_INTEGRATION in topics, f"Topics: {topics}")
             report.add("GitHub Topics", "home-assistant tag", TOPIC_HA in topics, f"Topics: {topics}")
             report.add("GitHub Topics", "hacs tag", TOPIC_HACS in topics, f"Topics: {topics}", severity="WARNING")
+            report.add("GitHub Topics", "Repository description set", bool(data.get("description")), f"Description: {data.get('description')}")
         except Exception as err:
             report.add("GitHub Topics", "gh repo view", False, f"Could not check remote topics: {err}", severity="WARNING")
 
