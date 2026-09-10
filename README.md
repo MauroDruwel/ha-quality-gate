@@ -214,6 +214,22 @@ The `templates/` folder contains drop-in starter files for new or refactored int
 
 ---
 
+## AI Agent Skill (Antigravity, Cursor, Copilot)
+
+This repository packages a standardized agent skill (`skills/mauro-ha-quality-gate/SKILL.md`) that equips coding assistants with full context of Mauro's architectural requirements, testing conventions, and CI/CD rules.
+
+To install or sync this skill into your local AI workspace:
+
+```bash
+# Antigravity / Agents SDK discovery
+mkdir -p ~/.agents/skills/mauro-ha-quality-gate
+cp skills/mauro-ha-quality-gate/SKILL.md ~/.agents/skills/mauro-ha-quality-gate/SKILL.md
+```
+
+When active, agents will automatically enforce MQG standards on any Home Assistant code creation, PR reviews, or refactoring sessions.
+
+---
+
 ## License
 
 MIT © [Mauro Druwel](https://maurodruwel.be)
