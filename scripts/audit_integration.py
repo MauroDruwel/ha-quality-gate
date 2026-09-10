@@ -34,7 +34,6 @@ MAURO_HA_REPOS = [
     "homewizard-cloud-ha",
     "SolarlogLegacyHA",
     "HeyTelecomHA",
-    "marstek_cloud",
 ]
 
 
@@ -227,7 +226,9 @@ def main() -> None:
             # Clone or fetch repo temporarily
             temp_dir = Path(f"/tmp/mqg_audit/{repo_name}")
             temp_dir.parent.mkdir(parents=True, exist_ok=True)
-            if not temp_dir.exists():
+            if temp_dir.exists():
+                subprocess.run(["git", "pull", "--ff-only"], cwd=temp_dir, check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            else:
                 subprocess.run(["gh", "repo", "clone", full_name, str(temp_dir), "--", "--depth=1"], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             if temp_dir.exists():
                 r = audit_local_dir(temp_dir, remote_name=full_name)
@@ -243,7 +244,9 @@ def main() -> None:
         remote_name = args.target if "/" in args.target else f"MauroDruwel/{args.target}"
         temp_dir = Path(f"/tmp/mqg_audit/{remote_name.replace('/', '_')}")
         temp_dir.parent.mkdir(parents=True, exist_ok=True)
-        if not temp_dir.exists():
+        if temp_dir.exists():
+            subprocess.run(["git", "pull", "--ff-only"], cwd=temp_dir, check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        else:
             subprocess.run(["gh", "repo", "clone", remote_name, str(temp_dir), "--", "--depth=1"], check=True)
         target_path = temp_dir
     else:
