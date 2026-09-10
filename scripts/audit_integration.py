@@ -172,19 +172,23 @@ def audit_local_dir(repo_path: Path, remote_name: str | None = None) -> AuditRep
         has_hassfest = False
         has_hacs_action = False
         has_tests = False
+        has_format = False
 
-        for f in wf_dir.glob("*.yml"):
+        for f in wf_dir.glob("*.y*ml"):
             content = f.read_text()
-            if "home-assistant/actions/hassfest" in content:
+            if "home-assistant/actions/hassfest" in content or "ha-quality-gate/.github/workflows/validate.yml" in content:
                 has_hassfest = True
-            if "hacs/action" in content:
+            if "hacs/action" in content or "ha-quality-gate/.github/workflows/validate.yml" in content:
                 has_hacs_action = True
-            if "pytest" in content:
+            if "pytest" in content or "ha-quality-gate/.github/workflows/tests.yml" in content:
                 has_tests = True
+            if "ruff" in content or "ha-quality-gate/.github/workflows/format.yml" in content:
+                has_format = True
 
-        report.add("Workflows", "Hassfest action workflow", has_hassfest, "Uses home-assistant/actions/hassfest")
-        report.add("Workflows", "HACS action validation workflow", has_hacs_action, "Uses hacs/action")
-        report.add("Workflows", "pytest testing workflow", has_tests, "Runs pytest in CI")
+        report.add("Workflows", "Hassfest action workflow", has_hassfest, "Uses Hassfest directly or via MQG reusable validate.yml")
+        report.add("Workflows", "HACS action validation workflow", has_hacs_action, "Uses HACS action directly or via MQG reusable validate.yml")
+        report.add("Workflows", "pytest testing workflow", has_tests, "Runs pytest directly or via MQG reusable tests.yml")
+        report.add("Workflows", "Ruff format/lint workflow", has_format, "Runs Ruff formatting/linting via MQG format.yml", severity="WARNING")
 
     # 7. Unit Tests
     tests_dir = repo_path / "tests"

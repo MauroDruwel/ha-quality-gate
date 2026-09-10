@@ -98,18 +98,68 @@ Every integration must adhere to the standard custom component filesystem layout
 
 ---
 
-### 4. CI/CD Validation Pipelines
+### 4. Centralized Reusable CI/CD Pipelines & Auto-formatting
 
-Every integration repository must include automated GitHub Actions:
+To eliminate workflow duplication across integration repositories, all CI/CD pipelines are defined centrally in `MauroDruwel/ha-quality-gate/.github/workflows/` and called via GitHub Actions reusable workflows (`workflow_call`):
 
-1. **`validate.yml`**:
-   - Runs on: `push` to `main`, `pull_request`, and weekly schedule (`cron: "0 4 * * 1"`).
+1. **`validate.yml`** (`MauroDruwel/ha-quality-gate/.github/workflows/validate.yml@main`):
    - **Hassfest**: `home-assistant/actions/hassfest@master` verifies manifest, translations, and component schema.
    - **HACS Validation**: `hacs/action@main` verifies compliance with HACS repository rules.
 
-2. **`tests.yml`**:
-   - Runs `pytest` with `pytest-homeassistant-custom-component`.
-   - Generates code coverage metrics.
+2. **`tests.yml`** (`MauroDruwel/ha-quality-gate/.github/workflows/tests.yml@main`):
+   - Runs `pytest` with `pytest-homeassistant-custom-component` in Python 3.13.
+
+3. **`format.yml`** (`MauroDruwel/ha-quality-gate/.github/workflows/format.yml@main`):
+   - **Auto-formatting & Linting**: Runs `ruff format` and `ruff check --fix`.
+   - **Auto-Commit**: Automatically commits formatting fixes back to the branch via `stefanzweifel/git-auto-commit-action@v5`!
+
+In each integration repository, workflows are ultra-lean and simply delegate to MQG:
+
+```yaml
+# .github/workflows/validate.yml
+name: Validate
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    uses: MauroDruwel/ha-quality-gate/.github/workflows/validate.yml@main
+```
+
+```yaml
+# .github/workflows/tests.yml
+name: Tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    uses: MauroDruwel/ha-quality-gate/.github/workflows/tests.yml@main
+```
+
+```yaml
+# .github/workflows/format.yml
+name: Format
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  format:
+    permissions:
+      contents: write
+    uses: MauroDruwel/ha-quality-gate/.github/workflows/format.yml@main
+```
 
 ---
 

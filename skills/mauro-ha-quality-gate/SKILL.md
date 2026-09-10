@@ -83,9 +83,15 @@ README.md                 # Badges, features, HACS install guide, debug logging
 
 ---
 
-## 4. Standard CI/CD Pipelines
+## 4. Centralized Reusable CI/CD Pipelines & Auto-formatting
 
-All integrations must have these two workflows in `.github/workflows/`:
+Workflows are maintained centrally in `MauroDruwel/ha-quality-gate/.github/workflows/` and called via GitHub Actions reusable workflows (`workflow_call`):
+
+- **`validate.yml`**: Hassfest + HACS Action
+- **`tests.yml`**: Pytest in CI
+- **`format.yml`**: Ruff format & check with auto-commit via `stefanzweifel/git-auto-commit-action@v5`
+
+Individual integration repositories simply delegate:
 
 ### `.github/workflows/validate.yml`
 ```yaml
@@ -100,21 +106,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  hassfest:
-    name: Hassfest
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: home-assistant/actions/hassfest@master
-
-  hacs:
-    name: HACS
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: hacs/action@main
-        with:
-          category: integration
+  validate:
+    uses: MauroDruwel/ha-quality-gate/.github/workflows/validate.yml@main
 ```
 
 ### `.github/workflows/tests.yml`
@@ -128,21 +121,25 @@ on:
   workflow_dispatch:
 
 jobs:
-  pytest:
-    name: pytest
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.13"
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install pytest-homeassistant-custom-component pytest-asyncio pytest-cov
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: Run tests
-        run: pytest
+  tests:
+    uses: MauroDruwel/ha-quality-gate/.github/workflows/tests.yml@main
+```
+
+### `.github/workflows/format.yml`
+```yaml
+name: Format
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  format:
+    permissions:
+      contents: write
+    uses: MauroDruwel/ha-quality-gate/.github/workflows/format.yml@main
 ```
 
 ---

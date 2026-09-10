@@ -1,0 +1,48 @@
+name: Reusable Format & Lint
+
+on:
+  workflow_call:
+    inputs:
+      auto-commit:
+        description: "Automatically commit formatted changes"
+        type: boolean
+        default: true
+
+jobs:
+  format:
+    name: Ruff Format & Lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Ruff
+        run: pip install ruff
+
+      - name: Run Ruff Format (Fix)
+        run: ruff format custom_components/ tests/
+
+      - name: Run Ruff Check (Fix)
+        run: ruff check --fix custom_components/ tests/
+
+      - name: Auto-commit formatting fixes
+        if: ${{ inputs.auto-commit }}
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style: auto-format code with ruff"
+          file_pattern: "custom_components/** tests/**"
+
+      - name: Verify Formatting
+        run: ruff format --check custom_components/ tests/
+
+      - name: Verify Linting
+        run: ruff check custom_components/ tests/
