@@ -22,5 +22,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest-homeassistant-custom-component pytest-asyncio pytest-cov
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          python -c "import json, glob; [print(r) for p in glob.glob('custom_components/*/manifest.json') for r in json.load(open(p)).get('requirements', [])]" | while read -r req; do
+            if [ -n "$req" ]; then
+              pip install "$req"
+            fi
+          done
       - name: Run tests
         run: pytest
