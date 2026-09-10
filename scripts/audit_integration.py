@@ -98,14 +98,21 @@ def audit_local_dir(repo_path: Path, remote_name: str | None = None) -> AuditRep
             )
             data = json.loads(out)
             topics = [t["name"] for t in (data.get("repositoryTopics") or [])]
+            # Mandatory topic: home-assistant-integration
             report.add("GitHub Topics", "home-assistant-integration tag", TOPIC_INTEGRATION in topics, f"Topics: {topics}")
-            report.add("GitHub Topics", "home-assistant tag", TOPIC_HA in topics, f"Topics: {topics}")
-            report.add("GitHub Topics", "hacs tag", TOPIC_HACS in topics, f"Topics: {topics}", severity="WARNING")
+            # Topic hacs: expected when in official hacs-default (e.g. Weathercloud-HA)
+            is_in_hacs_default = "Weathercloud-HA" in remote_name
+            if is_in_hacs_default:
+                report.add("GitHub Topics", "hacs tag (in hacs-default)", TOPIC_HACS in topics, f"Topics: {topics}")
+            # Ensure topics are clean and not overloaded
+            allowed_topics = {TOPIC_INTEGRATION, TOPIC_HACS} if is_in_hacs_default else {TOPIC_INTEGRATION}
+            extra_topics = set(topics) - allowed_topics
+            report.add("GitHub Topics", "Clean topics (not overloaded)", len(extra_topics) == 0, f"Extra: {list(extra_topics)}" if extra_topics else "Clean")
             report.add("GitHub Topics", "Repository description set", bool(data.get("description")), f"Description: {data.get('description')}")
         except Exception as err:
             report.add("GitHub Topics", "gh repo view", False, f"Could not check remote topics: {err}", severity="WARNING")
 
-    # 2. Structure
+    # 2. Structure & Brand
     cc_dir = repo_path / "custom_components"
     has_cc = cc_dir.is_dir()
     report.add("Structure", "custom_components directory", has_cc, f"Exists: {has_cc}")
@@ -116,6 +123,9 @@ def audit_local_dir(repo_path: Path, remote_name: str | None = None) -> AuditRep
         if subdirs:
             domain_dir = subdirs[0]
             report.add("Structure", f"Single domain component ({domain_dir.name})", len(subdirs) == 1, f"Found: {[s.name for s in subdirs]}")
+            brand_dir = domain_dir / "brand"
+            has_brand = brand_dir.is_dir() and (brand_dir / "icon.png").is_file()
+            report.add("Brand", "brand/icon.png exists", has_brand, f"Path: {brand_dir / 'icon.png'}")
         else:
             report.add("Structure", "Domain component directory", False, "custom_components is empty")
 

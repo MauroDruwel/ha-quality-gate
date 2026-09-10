@@ -30,14 +30,14 @@ flowchart TD
 
 ### 1. GitHub Metadata & Repository Topics
 
-Every Home Assistant repository owned by `@MauroDruwel` must be tagged with consistent GitHub topics:
+To keep repository tags clean and purposeful without tag overloading, every Home Assistant integration repository owned by `@MauroDruwel` uses strictly controlled topics:
 
 | Topic | When to Apply | Purpose |
 |---|---|---|
-| `home-assistant` | **Mandatory** for all HA repos | Global discovery for Home Assistant projects |
-| `home-assistant-integration` | **Mandatory** for all custom components | Identifies repository as an integration component |
-| `hacs` | **Mandatory** when HACS-compatible | Allows discovery by HACS search and community tools |
-| `hacs-default` | When merged into official `hacs/default` | Signifies inclusion in the default HACS store |
+| `home-assistant-integration` | **Mandatory** on all custom component integrations | Identifies repository as an integration component |
+| `hacs` | **Only** when available in official `hacs/default` | Signifies inclusion in the default HACS store |
+
+> **Note:** Do not overload repositories with redundant tags (e.g. language, generic categories, or duplicate integration names). Keep topics strictly limited to `home-assistant-integration` (and `hacs` when in default store).
 
 ---
 
