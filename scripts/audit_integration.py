@@ -149,7 +149,7 @@ def audit_local_dir(repo_path: Path, remote_name: str | None = None) -> AuditRep
             try:
                 m_data = json.loads(manifest_path.read_text())
                 report.add("Manifest", "codeowners has @MauroDruwel", "@MauroDruwel" in (m_data.get("codeowners") or []), f"codeowners: {m_data.get('codeowners')}")
-                report.add("Manifest", "integration_type is device", m_data.get("integration_type") == "device", f"type: {m_data.get('integration_type')}", severity="WARNING")
+                report.add("Manifest", "valid integration_type", m_data.get("integration_type") in ("device", "hub", "service"), f"type: {m_data.get('integration_type')}")
                 report.add("Manifest", "iot_class configured", bool(m_data.get("iot_class")), f"iot_class: {m_data.get('iot_class')}")
                 report.add("Manifest", "version matches semver", bool(re.match(r"^\d+\.\d+\.\d+", str(m_data.get("version", "")))), f"version: {m_data.get('version')}")
                 report.add("Manifest", "config_flow is true", m_data.get("config_flow") is True, f"config_flow: {m_data.get('config_flow')}")
