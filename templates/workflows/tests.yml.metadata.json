@@ -1,0 +1,4 @@
+{
+  "summary":  "Template for Home Assistant tests.yml workflow running pytest with pytest-homeassistant-custom-component.",
+  "updatedAt":  "2026-09-10T19:52:56.330390Z"
+}
